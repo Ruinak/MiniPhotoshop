@@ -19,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     private MyGraphicView graphicView;
     // 축척으로 사용될 전역변수 2개를 선언
     private static float scaleX = 1, scaleY = 1;
+    // 회전 각도로 사용될 전역변수 선언
+    private static float angle = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +41,11 @@ public class MainActivity extends AppCompatActivity {
     public void init(){
         ibZoomIn = findViewById(R.id.ibZoomIn);
         ibZoomOut = findViewById(R.id.ibZoomOut);
+        ibRotate = findViewById(R.id.ibRotate);
     }
 
     public void initLr(){
+        // 확대 버튼을 클릭할 때마다 축척 전역변수가 0.2씩 증가함
         ibZoomIn.setOnClickListener(v -> {
             scaleX = scaleX + 0.2f;
             scaleY = scaleY + 0.2f;
@@ -49,9 +53,15 @@ public class MainActivity extends AppCompatActivity {
             // 뷰의 invalidate( ) 메서드는 onDraw( )를 자동으로 호출함
             graphicView.invalidate();
         });
+        // 확대 버튼을 클릭할 때마다 축척 전역변수가 0.2씩 감소함
         ibZoomOut.setOnClickListener(v -> {
             scaleX = scaleX - 0.2f;
             scaleY = scaleY - 0.2f;
+            graphicView.invalidate();
+        });
+        // 회전하기 버튼을 클릭할 때마다 회전각도가 20도씩 증가함
+        ibRotate.setOnClickListener(v -> {
+            angle = angle + 20;
             graphicView.invalidate();
         });
     }
@@ -70,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
             int cenX = this.getWidth() / 2;
             int cenY = this.getHeight() / 2;
             canvas.scale(scaleX, scaleY, cenX, cenY);
+            // 전역변수에 설정된 각도로 캔버스를 회전시킴
+            canvas.rotate(angle, cenX, cenY);
 
             Bitmap picture = BitmapFactory.decodeResource(getResources(), R.drawable.umbrella);
 
