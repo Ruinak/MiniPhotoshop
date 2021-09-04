@@ -6,9 +6,11 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.EmbossMaskFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
@@ -18,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity2";
 
     // 위젯 변수 6개와 클래스 변수 1개를 전역변수로 선언
-    private ImageButton ibZoomIn, ibZoomOut, ibRotate, ibBright, ibDark, ibGray;
+    private ImageButton ibZoomIn, ibZoomOut, ibRotate, ibBright, ibDark, ibGray, ibBlurring, ibEmbossing;
     private MyGraphicView graphicView;
     // 축척으로 사용될 전역변수 2개를 선언
     private static float scaleX = 1, scaleY = 1;
@@ -28,7 +30,10 @@ public class MainActivity extends AppCompatActivity {
     private static float color = 1;
     // 채도 배수로 사용된 전역변수 선언
     private static float saturation = 1;
-
+    // 블러링을 받을 전역변수 선언
+    private static BlurMaskFilter bMask;
+    // 엠보싱을 받을 전역변수 선언
+    private static EmbossMaskFilter eMask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
         ibBright = findViewById(R.id.ibBright);
         ibDark = findViewById(R.id.ibDark);
         ibGray = findViewById(R.id.ibGray);
+        ibBlurring = findViewById(R.id.ibBlurring);
+        ibEmbossing = findViewById(R.id.ibEmbossing);
+        ibEmbossing = findViewById(R.id.ibEmbossing);
     }
 
     public void initLr(){
@@ -63,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             // 뷰의 invalidate( ) 메서드는 onDraw( )를 자동으로 호출함
             graphicView.invalidate();
         });
-        // 확대 버튼을 클릭할 때마다 축척 전역변수가 0.2씩 감소함
+        // 축소 버튼을 클릭할 때마다 축척 전역변수가 0.2씩 감소함
         ibZoomOut.setOnClickListener(v -> {
             scaleX = scaleX - 0.2f;
             scaleY = scaleY - 0.2f;
@@ -91,6 +99,16 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 saturation = 0;
             }
+            graphicView.invalidate();
+        });
+        // 블러링 버튼을 클릭하면 SOLID 블러링 적용
+        ibBlurring.setOnClickListener(v -> {
+            bMask = new BlurMaskFilter(30, BlurMaskFilter.Blur.SOLID);
+            graphicView.invalidate();
+        });
+        // 엠보싱 버튼을 클릭하면 빛 방향 변경
+        ibEmbossing.setOnClickListener(v -> {
+            eMask = new EmbossMaskFilter(new float[] {3, 3, 10}, 0.8f, 7, 10);
             graphicView.invalidate();
         });
     }
@@ -130,6 +148,10 @@ public class MainActivity extends AppCompatActivity {
 
             int picX = (this.getWidth() - picture.getWidth()) / 2;
             int picY = (this.getHeight() - picture.getHeight()) / 2;
+
+            paint.setMaskFilter(bMask);
+
+            paint.setMaskFilter(eMask);
 
             canvas.drawBitmap(picture, picX, picY, paint);
 
