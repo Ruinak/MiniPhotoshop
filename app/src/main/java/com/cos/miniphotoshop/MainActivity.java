@@ -7,6 +7,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -21,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
     private static float scaleX = 1, scaleY = 1;
     // 회전 각도로 사용될 전역변수 선언
     private static float angle = 0;
+    // 색상 배수로 사용될 전역변수 선언
+    private static float color = 1;
+    // 채도 배수로 사용된 전역변수 선언
+    private static float saturation = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
         ibZoomIn = findViewById(R.id.ibZoomIn);
         ibZoomOut = findViewById(R.id.ibZoomOut);
         ibRotate = findViewById(R.id.ibRotate);
+        ibBright = findViewById(R.id.ibBright);
+        ibDark = findViewById(R.id.ibDark);
+        ibGray = findViewById(R.id.ibGray);
     }
 
     public void initLr(){
@@ -64,6 +74,25 @@ public class MainActivity extends AppCompatActivity {
             angle = angle + 20;
             graphicView.invalidate();
         });
+        // 밝게하기 버튼을 클릭할 때마다 밝기가 0.2배씩 증가함
+        ibBright.setOnClickListener(v -> {
+            color = color + 0.2f;
+            graphicView.invalidate();
+        });
+        // 어둡게하기 버튼을 클릭할 때마다 밝기가 0.2배씩 감소함
+        ibDark.setOnClickListener(v -> {
+            color = color - 0.2f;
+            graphicView.invalidate();
+        });
+        // 회색영상 버튼을 클릭할 때마다 채도가 1이면 0으로, 0이면 1로 변경
+        ibGray.setOnClickListener(v -> {
+            if(saturation == 0) {
+                saturation = 1;
+            } else {
+                saturation = 0;
+            }
+            graphicView.invalidate();
+        });
     }
 
     // MyGraphicView 클래스를 정의
@@ -83,12 +112,26 @@ public class MainActivity extends AppCompatActivity {
             // 전역변수에 설정된 각도로 캔버스를 회전시킴
             canvas.rotate(angle, cenX, cenY);
 
+            Paint paint = new Paint();
+            float[] array = { color, 0, 0, 0, 0,
+                    0, color, 0, 0, 0,
+                    0, 0, color, 0, 0,
+                    0, 0, 0, 1, 0,};
+
+            ColorMatrix cm = new ColorMatrix(array);
+            // setSaturation( ) 메서드가 실행되면 위에 설정된 ColorMatrix
+            if(saturation == 0) {
+                cm.setSaturation(saturation);
+            }
+
+            paint.setColorFilter(new ColorMatrixColorFilter(cm));
+
             Bitmap picture = BitmapFactory.decodeResource(getResources(), R.drawable.umbrella);
 
             int picX = (this.getWidth() - picture.getWidth()) / 2;
             int picY = (this.getHeight() - picture.getHeight()) / 2;
 
-            canvas.drawBitmap(picture, picX, picY, null);
+            canvas.drawBitmap(picture, picX, picY, paint);
 
             picture.recycle();
         }
